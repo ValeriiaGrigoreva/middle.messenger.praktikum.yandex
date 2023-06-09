@@ -1,0 +1,33 @@
+.grid--flex { display: flex; }
+.grid--flex-column { flex-direction: column; }
+
+.grid--align-start { align-items: flex-start; }
+.grid--align-end { align-items: flex-end; }
+.grid--align-center { align-items: center; }
+.grid--align-baseline { align-items: baseline; }
+.grid--align-stretch { align-items: stretch; }
+.grid--self-end { align-self: flex-end; }
+.grid--self-center { align-self: center; }
+.grid--self-start { align-self: flex-start; }
+.grid--self-stretch { align-self: stretch; }
+
+.grid--justify-start { justify-content: flex-start; }
+.grid--justify-end { justify-content: flex-end; }
+.grid--justify-center { justify-content: center; }
+.grid--justify-around { justify-content: space-around; }
+.grid--justify-between { justify-content: space-between; }
+.grid--justify-stretch { justify-content: stretch; }
+
+.grid--flex-center { @extend .grid--flex, .grid--align-center; }
+.grid--flex-all-center { @extend .grid--flex, .grid--align-center, .grid--justify-center; }
+
+.grid--container {
+    @extend .grid--flex-all-center, .grid--flex-column, .h--full;
+}
+.grid--content {
+    @extend .grid--flex-center, .grid--flex-column, .grid--justify-between;
+}
+
+.grid--block {
+    @extend .grid--flex-all-center, .grid--flex-column, .w--full;
+}

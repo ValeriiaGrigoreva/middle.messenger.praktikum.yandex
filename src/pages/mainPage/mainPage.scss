@@ -1,0 +1,24 @@
+@import '../../styles/index.scss';
+
+.main-page {
+    &-content {
+        width: 280px;
+        height: 400px;
+    }
+
+    &-header {
+        color: $blue;
+    }
+
+    &-buttons {
+        @extend .grid--flex-all-center, .grid--flex-column;
+    }
+
+    &-auth-button {
+        margin-bottom: 10px;
+    }
+
+    &-account-button {
+        color: $orange;
+    }
+}
