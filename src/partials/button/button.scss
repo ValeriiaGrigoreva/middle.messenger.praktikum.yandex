@@ -1,0 +1,27 @@
+@import '../../styles/index.scss';
+
+.button {
+    padding: 18px 30px 18px 30px;
+    border-radius: 24px;
+    font-size: 14px;
+    color: white;
+    border: 0px;
+    cursor: pointer;
+    font-family: 'Unbounded', cursive;
+
+    &--background {
+        &-orange {
+            @extend .background--orange;
+        }
+
+        &-blue {
+            @extend .background--blue;
+        }
+
+        &-none {
+            background-color: white;
+            color: $orange;
+        }
+    }
+
+}
