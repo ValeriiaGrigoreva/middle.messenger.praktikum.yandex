@@ -1,0 +1,19 @@
+@import '../../styles/index.scss';
+
+.error {
+    &-number {
+        @extend .color--blue;
+        margin-bottom: 20px;
+        font-size: 40px;
+    }
+
+    &-text {
+        @extend .color--orange;
+        margin-bottom: 10px;
+    }
+
+    &-back {
+        @extend .color--blue;
+        font-size: 10px;
+    }
+}
