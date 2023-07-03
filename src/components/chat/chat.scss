@@ -1,0 +1,52 @@
+@import '../../styles/index';
+
+.chat {
+    &--container {
+        border-radius: 30px;
+        border: 1px solid #67BACC;
+        padding: 16px;
+        margin-bottom: 12px;
+
+        @extend .grid--flex, .grid--justify-between;
+    }
+
+    &--img {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid #67BACC;
+        margin-right: 12px;
+    }
+
+    &--name {
+        font-size: 14px;
+        color: black;
+        font-weight: 700px;
+        margin-bottom: 4px;
+        line-height: 20px;
+    }
+
+    &--message {
+        font-size: 12px;
+        color: #999;
+    }
+
+    &--time {
+        font-size: 10px;
+        color: #999;
+    }
+
+    &--unread-messages {
+        border-radius: 50%;
+
+        @extend .background--orange, .grid--flex-all-center;
+
+        width: 20px;
+        height: 20px;
+
+        &-number {
+            color: white;
+            font-size: 10px;
+        }
+    }
+}
