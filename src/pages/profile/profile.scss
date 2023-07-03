@@ -1,4 +1,4 @@
-@import '../../styles/index.scss';
+@import '../../styles/index';
 
 .profile {
     &-content {
@@ -21,7 +21,7 @@
     }
 
     &-form {
-        margin: 20px 0px 20px 0px;
+        margin: 20px 0;
     }
 
     &-exit-button {

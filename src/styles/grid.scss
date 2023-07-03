@@ -24,6 +24,7 @@
 .grid--container {
     @extend .grid--flex-all-center, .grid--flex-column, .h--full;
 }
+
 .grid--content {
     @extend .grid--flex-center, .grid--flex-column, .grid--justify-between;
 }

@@ -1,11 +1,15 @@
 html {
     height: 100vh;
-    font-family: 'Unbounded', cursive;
+    font-family: Unbounded, cursive;
 }
 
-body, p, #app, main {
+body, #app, main {
     margin: 0;
     height: 100%;
+}
+
+p {
+    margin: 0;
 }
 
 form {
