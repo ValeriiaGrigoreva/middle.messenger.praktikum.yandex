@@ -1,0 +1,12 @@
+@import '../../styles/index';
+
+.chats {
+    &--messages-block {
+        width: 350px;
+
+        @extend .grid--flex, .grid--flex-column, .h--full;
+
+        padding: 12px;
+        border-right: 1px solid $blue;
+    }
+}
