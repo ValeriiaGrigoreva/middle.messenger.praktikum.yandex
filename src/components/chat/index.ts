@@ -5,7 +5,7 @@ type ChatProps = {
     name: string,
     message: string,
     time: string,
-    unreadMessages?: string,
+    unreadMessages?: number,
     attributes?: Record<string, string>
     events?: Record<string, Function>
 }

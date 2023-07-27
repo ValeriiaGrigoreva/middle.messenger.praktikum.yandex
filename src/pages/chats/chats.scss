@@ -8,5 +8,10 @@
 
         padding: 12px;
         border-right: 1px solid $blue;
+        overflow-y: scroll;
+    }
+
+    &-new-chat-button {
+        margin-bottom: 12px;
     }
 }
