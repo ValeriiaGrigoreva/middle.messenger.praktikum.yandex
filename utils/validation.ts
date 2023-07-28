@@ -5,7 +5,7 @@ const fio = /(^[A-Z]{1}[a-z-]*$)|(^[А-Я]{1}[а-я-]*$)/
 const email = /^((([0-9A-Za-z]{1}[-0-9A-z\.]{1,}[0-9A-Za-z]{1})|([0-9А-Яа-я]{1}[-0-9А-я\.]{1,}[0-9А-Яа-я]{1}))@([-A-Za-z]{1,}\.){1,2}[-A-Za-z]{2,})$/
 const phone = /^[+]?[0-9]{10,15}$/
 const login = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{3,20}$/
-const password = /^(?=.*[A-ZА-Я])(?=.*[0-9])\w{8,40}$/
+const password = /^(?=.*[A-ZА-Я])(?=.*[0-9]).{8,40}$/
 
 const errorMessages = {
     fio: 'Первая буква должна быть заглавной, без пробелов и без цифр, из спецсимволов допустим только дефис',
@@ -61,8 +61,8 @@ export function validate(name: string, value: string): boolean | null {
             }
             break
         case 'password' :
-        case 'old_password':
-        case 'new_password':
+        case 'oldPassword':
+        case 'newPassword':
         case 'repeat_new_password':
         case 'password_repeat':
             result = password.test(value)
@@ -71,6 +71,9 @@ export function validate(name: string, value: string): boolean | null {
             }
             break
         case 'message':
+        case 'chatName':
+        case 'userId':
+        case 'deleteUserId':
             result = !!value.trim().length
             if(!result) {
                 errorName = 'message'

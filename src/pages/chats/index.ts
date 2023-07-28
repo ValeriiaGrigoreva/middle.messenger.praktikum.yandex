@@ -1,31 +1,92 @@
 import { Block } from "../../../utils/Block";
 import { Chat } from "../../components/chat";
 import { InputBlock } from "../../components/input/inputBlock";
+import { Button } from "../../components/button";
 import './chats.scss'
 import { validate } from '../../../utils/validation'
+import { ChatModal } from "../../components/chat/chatModal";
+import store from "../../../utils/Store";
+import { ChatBlock } from "../../components/chat/chatBlock";
+import { withStore } from "../../../utils/Store";
+import router from '../../../utils/Router'
 
 type ChatsPageProps = {
     name?: string,
+    chats?: {
+        title: string, 
+        last_message: {
+            content: string
+        },
+        unread_count: number,
+    }[]
 }
 
-export class ChatsPage extends Block<ChatsPageProps> {
+export class BaseChatsPage extends Block<ChatsPageProps> {
     constructor(props: ChatsPageProps) {
         super('main', props)
     }
 
     init() {
-        this.children.chat1 = new Chat({
-            name: 'Евгений',
-            message: 'Привет! Как дела?',
-            time: '11:57',
-            unreadMessages: '1',
+        let chatsResult: Chat[] = []
+        this.props.chats?.forEach((item) => {
+            const chat  = new Chat({
+                name: item.title,
+                message: `${item.last_message ? item.last_message.content : ''}`,
+                time: '11:57',
+                unreadMessages: item.unread_count,
+                events: {
+                    'click': async () => {
+                        store.set('activeChat', item)
+                        const socketObject = store.getState().sockets?.find(item => item.id === store.getState().activeChat?.id)
+                        socketObject?.socket.getMessages()
+                    }
+                }
+            })
+
+            chatsResult.push(chat)
         })
 
-        this.children.chat2 = new Chat({
-            name: 'Сергей',
-            message: 'Пойду завтра',
-            time: '11:53',
-            unreadMessages: '1',
+        this.children.chats = chatsResult
+
+        this.children.chatBlock = new ChatBlock({
+            attributes: {
+                class: 'grid--flex grid--flex-column grid--justify-between w--full chat-block',
+            }
+        })
+
+        this.children.newChatModal = new ChatModal({
+            title: 'Новый чат',
+            buttonText: 'Создать чат',
+            inputLabel: 'Название чата',
+            inputId: 'chatName',
+            eventType: 'newChat',
+            attributes: {
+                style: 'display: none;'
+            }
+        })
+
+        this.children.newChatButton = new Button({
+            text: 'Новый чат',
+            attributes: {
+                class: 'button button--background-blue chats-new-chat-button',
+            },
+            events: {
+                'click': () => {
+                    this.children.newChatModal.show()
+                }
+            }
+        })
+
+        this.children.profileButton = new Button({
+            text: 'В профиль',
+            attributes: {
+                class: 'button button--background-orange chats-new-chat-button',
+            },
+            events: {
+                'click': () => {
+                    router.go('/settings')
+                }
+            }
         })
 
         this.children.messageInput = new InputBlock({
@@ -49,41 +110,19 @@ export class ChatsPage extends Block<ChatsPageProps> {
         return this.compile(`
         <div class="h--full grid--flex">
             <div class="chats--messages-block">
-                {{{chat1}}}
-                {{{chat2}}}
+                {{{profileButton}}}
+                {{{newChatButton}}}
+                {{{chats}}}
             </div>
-            <div class="grid--flex grid--align-end w--full">
-                <form>
-                    {{{messageInput}}}
-                </form>
-            </div>
+            {{{chatBlock}}}
+            {{{newChatModal}}}
         </div>
         `, this.props)
     }
-
-    addOtherListeners() {
-        const form = this.getContent()!.querySelector('form')
-        form?.addEventListener('submit', (e) => {
-            e.preventDefault()
-
-            const data = new FormData(form)
-            let result: Record<string, string> = {}
-            let validation: boolean = true
-
-            for(let [name, value] of data) {
-                const valueString: string = value.toString()
-                const nameString: string = name.toString()
-                const validationResult = validate(nameString, valueString)
-
-                if (!validationResult) {
-                    validation = false
-                }
-
-                result[nameString] = valueString
-            }
-
-            console.log(validation)
-            console.log(result)
-        })
-    }
 }
+
+function mapStateToProps(state: any) {
+    return { chats: state.chats };
+}
+
+export const ChatsPage = withStore(mapStateToProps)(BaseChatsPage)

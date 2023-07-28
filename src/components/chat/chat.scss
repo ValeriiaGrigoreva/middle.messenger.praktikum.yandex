@@ -1,11 +1,18 @@
 @import '../../styles/index';
 
 .chat {
+    &-block {
+        padding-right: 16px;
+        padding-left: 16px;
+        padding-top: 16px;
+    }
+
     &--container {
         border-radius: 30px;
         border: 1px solid #67BACC;
         padding: 16px;
         margin-bottom: 12px;
+        cursor: pointer;
 
         @extend .grid--flex, .grid--justify-between;
     }
@@ -49,4 +56,55 @@
             font-size: 10px;
         }
     }
+
+    &--new-chat-modal {
+        background-color: white;
+        border-radius: 10px;
+        width: 340px;
+        height: 300px;
+        box-sizing: border-box;
+
+        @extend .grid--flex, .grid--flex-column;
+
+        border: 1px solid $blue;
+
+        &-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+
+            @extend .w--full, .h--full, .background--blue-opacity-50, .grid--flex-all-center;
+        }
+
+        &-header {
+            margin-bottom: 20px;
+            margin-top: 20px;
+            color: $blue,
+        }
+
+        &-close {
+            padding: 16px 16px 0;
+
+            @extend .grid--flex, .grid--justify-end;
+        }
+
+        &-main {
+            padding: 0 32px 32px;
+
+            @extend .grid--flex-all-center, .grid--flex-column;
+        }
+    }
+}
+
+.message-block {
+    color: black;
+    padding: 16px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-radius: 30px;
+    max-width: 300px;
+}
+
+.messages-container {
+    overflow-y: scroll;
 }

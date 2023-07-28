@@ -2,63 +2,66 @@ import { MainPage } from './src/pages/mainPage/index'
 import { RegistrationPage } from './src/pages/registration/index'
 import { ProfilePage } from './src/pages/profile/index'
 import { ChangePasswordPage } from './src/pages/profile/changePassword'
+import { ChangeDataPage } from './src/pages/profile/changeData'
 import { ChatsPage } from './src/pages/chats/index'
 import { ErrorPage } from './src/pages/error/index'
+import router from './utils/Router'
+import AuthController from './src/controllers/AuthController'
+import ChatsController from './src/controllers/ChatsController'
+import { Socket } from './src/api/socket'
+import store from './utils/Store'
 
-const mainPage = new MainPage({
-    title: 'Вход'
-})
+window.addEventListener('DOMContentLoaded', async () => {  
+    router.use('/', MainPage, {})
+    router.use('/sign-up', RegistrationPage, { title: 'Регистрация' })
+    router.use('/settings', ProfilePage, {})
+    router.use('/messenger', ChatsPage, { name: 'Иван' })
+    router.use('/settings/change-password', ChangePasswordPage, {})
+    router.use('/settings/change-data', ChangeDataPage, {})
+    router.use('/error', ErrorPage, { 
+        number: '500',
+        text: 'Скоро будет работать',
+        link: 'chats',
+    })
 
-const registrationPage = new RegistrationPage({
-    title: 'Регистрация'
-})
+    let isProtectedRoute = true;
 
-const profilePage = new ProfilePage({
-    name: 'Иван'
-})
+    switch (window.location.pathname) {
+        case '/':
+        case '/sign-up':
+        isProtectedRoute = false;
+        break;
+    }
 
-const changePasswordPage = new ChangePasswordPage({
-    name: 'Иван'
-})
-
-const chatsPage = new ChatsPage({
-})
-
-const errorPage = new ErrorPage({
-    number: '500',
-    text: 'Скоро будет работать',
-    link: 'chats',
-})
+    try {
+        await AuthController.fetchUser();
+        await ChatsController.fetchChats();
 
 
-document.addEventListener('DOMContentLoaded', () => {  
-    const root = document.querySelector('#app')
-    let template: HTMLElement 
+        let sockets: {id: number, socket: Socket}[] = []
+
+        store.getState().chats?.forEach(async (item) => {
+          const token = await ChatsController.getChatToken(item.id)
+          const socket = new Socket(item.id, token)
+          sockets.push({id: item.id, socket})
+        })
+
+        store.set('sockets', sockets)
     
+        router.start();
 
-    switch(window.location.pathname) {
-        case '/': 
-            template = mainPage.getContent()!
-            break
-        case '/chats': 
-            template = chatsPage.getContent()!
-            break
-        case '/registration': 
-            template = registrationPage.getContent()!
-            break
-        case '/profile': 
-            template = profilePage.getContent()!
-            break
-        case '/error': 
-            template = errorPage.getContent()!
-            break
-        case '/profile/changePassword': 
-            template = changePasswordPage.getContent()!
-            break
-    }
+        if (!isProtectedRoute) {
+          router.go('/messenger');
+        }
+  
+      } catch (e) {
+        console.log(e, 'Here')
+        router.start();
 
-    if (root !== null) {
-        root.append(template!)
-    }
+        if (isProtectedRoute) {
+          router.go('/');
+        }
+  
+      }
     
 })
