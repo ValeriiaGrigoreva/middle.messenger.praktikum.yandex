@@ -2,22 +2,51 @@ import { Block } from "../../../utils/Block";
 import { Button } from "../../components/button";
 import { InputBlock } from "../../components/input/inputBlock";
 import './profile.scss'
-import { validate } from '../../../utils/validation'
+import router from '../../../utils/Router'
+import AuthController from "../../controllers/AuthController";
+import store from "../../../utils/Store";
+import { InputFile } from "../../components/input/inputFile";
+import { withStore } from "../../../utils/Store";
 
 type ProfilePageProps = {
     name: string,
 }
 
-export class ProfilePage extends Block<ProfilePageProps> {
+
+export class BaseProfilePage extends Block<ProfilePageProps> {
     constructor(props: ProfilePageProps) {
         super('main', props)
     }
 
     init() {
+        this.children.messengerButton = new Button({
+            text: 'Чаты',
+            attributes: {
+                class: 'button button--background-orange',
+            },
+            events: {
+                'click': () => {
+                    router.go('/messenger')
+                }
+            }
+        })
+
+        this.children.avatarInput = new InputFile({
+            id: 'avatar',
+            name: 'avatar',
+            disabled: 'disabled',
+        })
+
+
         this.children.exitButton = new Button({
             text: 'Выйти',
             attributes: {
                 class: 'button button--background-orange profile-exit-button'
+            },
+            events: {
+                'click': () => {
+                    AuthController.logout()
+                }
             }
         })
 
@@ -25,6 +54,11 @@ export class ProfilePage extends Block<ProfilePageProps> {
             text: 'Изменить данные',
             attributes: {
                 class: 'button button--background-blue'
+            },
+            events: {
+                'click': () => {
+                    router.go('/settings/change-data')
+                }
             }
         })
 
@@ -32,6 +66,11 @@ export class ProfilePage extends Block<ProfilePageProps> {
             text: 'Изменить пароль',
             attributes: {
                 class: 'button button--background-blue'
+            },
+            events: {
+                'click': () => {
+                    router.go('/settings/change-password')
+                }
             }
         })
 
@@ -40,15 +79,12 @@ export class ProfilePage extends Block<ProfilePageProps> {
             label: 'Почта',
             type: 'email',
             name: 'email',
+            value: store.getState().user?.email,
+            readonly: 'readonly',
             attributes: {
                 class: 'input-container',
-                validationName: 'email'
+                validationName: 'email',
             }, 
-            events: {
-                'blur': (e: Event) => {
-                    validate('email', (<HTMLInputElement>e.target).value)
-                }
-            }
         })
 
         this.children.loginInput = new InputBlock({
@@ -56,15 +92,12 @@ export class ProfilePage extends Block<ProfilePageProps> {
             label: 'Логин',
             type: 'text',
             name: 'login',
+            value: store.getState().user?.login,
+            readonly: 'readonly',
             attributes: {
                 class: 'input-container',
                 validationName: 'login'
             }, 
-            events: {
-                'blur': (e: Event) => {
-                    validate('login', (<HTMLInputElement>e.target).value)
-                }
-            }
         })
 
         this.children.firstNameInput = new InputBlock({
@@ -72,15 +105,12 @@ export class ProfilePage extends Block<ProfilePageProps> {
             label: 'Имя',
             type: 'text',
             name: 'first_name',
+            value: store.getState().user?.first_name,
+            readonly: 'readonly',
             attributes: {
                 class: 'input-container',
                 validationName: 'first_name'
             }, 
-            events: {
-                'blur': (e: Event) => {
-                    validate('first_name', (<HTMLInputElement>e.target).value)
-                }
-            }
         })
 
         this.children.secondNameInput = new InputBlock({
@@ -88,15 +118,12 @@ export class ProfilePage extends Block<ProfilePageProps> {
             label: 'Фамилия',
             type: 'text',
             name: 'second_name',
+            value: store.getState().user?.second_name,
+            readonly: 'readonly',
             attributes: {
                 class: 'input-container',
                 validationName: 'second_name'
             }, 
-            events: {
-                'blur': (e: Event) => {
-                    validate('second_name', (<HTMLInputElement>e.target).value)
-                }
-            }
         })
 
         this.children.phoneInput = new InputBlock({
@@ -104,15 +131,12 @@ export class ProfilePage extends Block<ProfilePageProps> {
             label: 'Телефон',
             type: 'tel',
             name: 'phone',
+            value: store.getState().user?.phone,
+            readonly: 'readonly',
             attributes: {
                 class: 'input-container',
                 validationName: 'phone'
             }, 
-            events: {
-                'blur': (e: Event) => {
-                    validate('phone', (<HTMLInputElement>e.target).value)
-                }
-            }
         })
 
         this.children.chatNameInput = new InputBlock({
@@ -120,15 +144,12 @@ export class ProfilePage extends Block<ProfilePageProps> {
             label: 'Имя в чате',
             type: 'text',
             name: 'display_name',
+            readonly: 'readonly',
+            value: store.getState().user?.display_name ? store.getState().user?.display_name : '',
             attributes: {
                 class: 'input-container',
                 validationName: 'display_name'
             }, 
-            events: {
-                'blur': (e: Event) => {
-                    validate('display_name', (<HTMLInputElement>e.target).value)
-                }
-            }
         })
     }
 
@@ -137,8 +158,8 @@ export class ProfilePage extends Block<ProfilePageProps> {
         <div class="grid--container">
             <div class="profile-content grid--content">
                 <div class="grid--block">
-                    <div class="profile-photo"></div>
-                    <h3 class="color--blue">{{name}}</h3>
+                    {{{avatarInput}}}
+                    <h3 class="color--blue">{{{first_name}}}</h3>
                     <form class="profile-form">
                         {{{emailInput}}}
                         {{{loginInput}}}
@@ -152,38 +173,21 @@ export class ProfilePage extends Block<ProfilePageProps> {
                                 {{{changeDataButton}}}
                                 {{{changePasswordButton}}}
                             </div>
-                            {{{exitButton}}}
                         </div>
                     </form>
+                    {{{exitButton}}}
+                    <div class="profile-messenger-button">
+                        {{{messengerButton}}}
+                    </div>
                 </div>
             </div>
         </div>
         `, this.props)
     }
-
-    addOtherListeners() {
-        const form = this.getContent()!.querySelector('form')
-        form?.addEventListener('submit', (e) => {
-            e.preventDefault()
-
-            const data = new FormData(form)
-            let result: Record<string, string> = {}
-            let validation: boolean = true
-
-            for(let [name, value] of data) {
-                const valueString: string = value.toString()
-                const nameString: string = name.toString()
-                const validationResult = validate(nameString, valueString)
-
-                if (!validationResult) {
-                    validation = false
-                }
-
-                result[nameString] = valueString
-            }
-
-            console.log(validation)
-            console.log(result)
-        })
-    }
 }
+
+function mapStateToProps(state: any) {
+    return { ...state.user };
+  }
+
+export const ProfilePage = withStore(mapStateToProps)(BaseProfilePage)

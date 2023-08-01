@@ -7,6 +7,8 @@ type InputBlockProps = {
     label: string,
     type: string,
     name: string,
+    readonly?: string,
+    value?: string,
     attributes?: Record<string, string>
     events?: Record<string, Function>
 }
@@ -22,10 +24,15 @@ export class InputBlock extends Block<InputBlockProps> {
                 class: 'input',
                 id: this.props.id,
                 type: this.props.type,
-                name: this.props.name,           
+                name: this.props.name,  
+                value: this.props.value ? this.props.value : '',
             },
             events: {...this.props.events},
         })
+
+        if (this.props.readonly) {
+            this.children.input.props.attributes = {...this.children.input.props.attributes, readonly: this.props.readonly}
+        }
     }
 
     render() {

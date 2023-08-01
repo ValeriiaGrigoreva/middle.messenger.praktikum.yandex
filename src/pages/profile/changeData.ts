@@ -1,25 +1,27 @@
 import { Block } from "../../../utils/Block";
 import { Button } from "../../components/button";
 import { InputBlock } from "../../components/input/inputBlock";
-import './registration.scss'
+import './profile.scss'
 import { validate } from '../../../utils/validation'
 import AuthController from "../../controllers/AuthController";
-import { ISignUpData } from "../../api/AuthApi";
-import { withStore } from "../../../utils/Store";
+import UserController from "../../controllers/UserController";
+import store, { withStore } from "../../../utils/Store";
+import { IUserChangeData } from "../../api/UserApi";
+import { InputFile } from "../../components/input/inputFile";
 
-type RegistrationPageProps = {
-    title: string,
+type ChangeDataPageProps = {
+    name: string,
 }
 
-function validateAllFields(thisWord: any): {validation: boolean, data: ISignUpData } {
-    const form: HTMLFormElement = thisWord.getContent()!.querySelector('form')
+function validateAllFields(thisWord: any): {validation: boolean, data: IUserChangeData } {
+    const form: HTMLFormElement = thisWord.getContent()!.querySelector('.profile-form')
     const data = new FormData(form)
-    let result: ISignUpData = {
+    let result: IUserChangeData = {
         first_name: '',
         second_name: '',
         login: '',
         email: '',
-        password: '',
+        display_name: '',
         phone: '',
     }
     let validation: boolean = true
@@ -29,38 +31,54 @@ function validateAllFields(thisWord: any): {validation: boolean, data: ISignUpDa
         const nameString: string = name.toString()
         const validationResult = validate(nameString, valueString)
 
-        if (nameString === 'password_repeat' && data.get(name) !== data.get('password')) {
-            validation = false
-        }
-
         if (!validationResult) {
             validation = false
         }
         
-        if(nameString !== 'password_repeat') {
-            result[nameString as keyof typeof result] = valueString
-        }
+        
+        result[nameString as keyof typeof result] = valueString
     }
 
     return { validation, data: result }
 }
 
-export class BaseRegistrationPage extends Block<RegistrationPageProps> {
-    constructor(props: RegistrationPageProps) {
+
+class BaseChangeDataPage extends Block<ChangeDataPageProps> {
+
+    constructor(props: ChangeDataPageProps) {
         super('main', props)
     }
 
     init() {
-        this.children.registrationButton = new Button({
-            text: 'Зарегистрироваться',
+        this.children.avatarInput = new InputFile({
+            id: 'avatar',
+            name: 'avatar',
+            events: {
+                'change': (e: any) => {
+                    const {files} = e.target
+                    const [file] = files
+
+                    if (!file) {
+                        return
+                    }
+
+                    const form = new FormData()
+                    form.append('avatar', file)
+                    UserController.changeAvatar(form)
+                }
+            }
+        })
+
+        this.children.saveButton = new Button({
+            text: 'Сохранить',
             attributes: {
-                class: 'button button--background-blue registration-auth-button'
+                class: 'button button--background-orange profile-exit-button'
             },
             events: {
                 'click': () => {
                     const validationResult = validateAllFields(this)
                     if (validationResult.validation) {
-                        AuthController.signup(validationResult.data)
+                        UserController.changeProfile(validationResult.data)
                     }
                 }
             }
@@ -71,9 +89,10 @@ export class BaseRegistrationPage extends Block<RegistrationPageProps> {
             label: 'Почта',
             type: 'email',
             name: 'email',
+            value: store.getState().user?.email,
             attributes: {
                 class: 'input-container',
-                validationName: 'email'
+                validationName: 'email',
             }, 
             events: {
                 'blur': (e: Event) => {
@@ -87,6 +106,7 @@ export class BaseRegistrationPage extends Block<RegistrationPageProps> {
             label: 'Логин',
             type: 'text',
             name: 'login',
+            value: store.getState().user?.login,
             attributes: {
                 class: 'input-container',
                 validationName: 'login'
@@ -103,6 +123,7 @@ export class BaseRegistrationPage extends Block<RegistrationPageProps> {
             label: 'Имя',
             type: 'text',
             name: 'first_name',
+            value: store.getState().user?.first_name,
             attributes: {
                 class: 'input-container',
                 validationName: 'first_name'
@@ -119,6 +140,7 @@ export class BaseRegistrationPage extends Block<RegistrationPageProps> {
             label: 'Фамилия',
             type: 'text',
             name: 'second_name',
+            value: store.getState().user?.second_name,
             attributes: {
                 class: 'input-container',
                 validationName: 'second_name'
@@ -135,6 +157,7 @@ export class BaseRegistrationPage extends Block<RegistrationPageProps> {
             label: 'Телефон',
             type: 'tel',
             name: 'phone',
+            value: store.getState().user?.phone,
             attributes: {
                 class: 'input-container',
                 validationName: 'phone'
@@ -146,59 +169,50 @@ export class BaseRegistrationPage extends Block<RegistrationPageProps> {
             }
         })
 
-        this.children.passwordInput = new InputBlock({
-            id: 'password',
-            label: 'Пароль',
-            type: 'password',
-            name: 'password',
+        this.children.chatNameInput = new InputBlock({
+            id: 'display_name',
+            label: 'Имя в чате',
+            type: 'text',
+            name: 'display_name',
+            value: store.getState().user?.display_name ? store.getState().user?.display_name : '',
             attributes: {
                 class: 'input-container',
-                validationName: 'password'
+                validationName: 'display_name'
             }, 
             events: {
                 'blur': (e: Event) => {
-                    validate('password', (<HTMLInputElement>e.target).value)
-                }
-            }
-        })
-
-        this.children.passwordSecondInput = new InputBlock({
-            id: 'password_repeat',
-            label: 'Пароль (еще раз)',
-            type: 'password',
-            name: 'password_repeat',
-            attributes: {
-                class: 'input-container',
-                validationName: 'password_repeat'
-            }, 
-            events: {
-                'blur': (e: Event) => {
-                    validate('password_repeat', (<HTMLInputElement>e.target).value)
+                    validate('display_name', (<HTMLInputElement>e.target).value)
                 }
             }
         })
     }
 
+    componentDidMount(): void {
+        AuthController.fetchUser();
+    }
+
     render() {
         return this.compile(`
         <div class="grid--container">
-            <div class="registration-content grid--content">
+            <div class="profile-content grid--content">
                 <div class="grid--block">
-                    <h1 class="registration-header">{{title}}</h1>
-
-                    <form>
+                    <form class="grid--flex-all-center" id="avatar-form">
+                        {{{avatarInput}}}
+                    </form>
+                    <h3 class="color--blue">{{{first_name}}}</h3>
+                    <form class="profile-form">
                         {{{emailInput}}}
                         {{{loginInput}}}
                         {{{firstNameInput}}}
                         {{{secondNameInput}}}
+                        {{{chatNameInput}}}
                         {{{phoneInput}}}
-                        {{{passwordInput}}}
-                        {{{passwordSecondInput}}}
 
-                        <div class="registration-buttons">
-                            {{{registrationButton}}}
+                        <div class="grid--flex-all-center">
+                            {{{saveButton}}}
                         </div>
                     </form>
+                    
                 </div>
             </div>
         </div>
@@ -210,4 +224,4 @@ function mapStateToProps(state: any) {
     return { ...state.user };
 }
 
-export const RegistrationPage = withStore(mapStateToProps)(BaseRegistrationPage)
+export const ChangeDataPage = withStore(mapStateToProps)(BaseChangeDataPage)

@@ -8,10 +8,37 @@
     background-color: $blue;
 }
 
+.background--blue-opacity-50 {
+    background-color: $blue-opacity-50;
+}
+
+.background--my-message {
+    background-color: $blue-opacity-30;
+}
+
+.background--friend-message {
+    background-color: $orange-opacity-30;
+}
+
 .color--orange {
     color: $orange;
 }
 
 .color--blue {
     color: $blue;
+}
+
+.z-index-0 {
+    z-index: 0;
+    position: relative;
+}
+
+.z-index-10 {
+    z-index: 10;
+    position: relative;
+}
+
+.z-index-20 {
+    z-index: 0;
+    position: relative;
 }

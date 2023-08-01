@@ -3,13 +3,37 @@ import { Button } from "../../components/button";
 import { InputBlock } from "../../components/input/inputBlock";
 import './mainPage.scss'
 import { validate } from '../../../utils/validation'
+import router from '../../../utils/Router'
+import AuthController from "../../controllers/AuthController";
+import { ISignInData } from "../../api/AuthApi";
+import { withStore } from "../../../utils/Store";
 
-type MainPageProps = {
-    title: string,
+function validateAllFields(thisWord: any): {validation: boolean, data: ISignInData } {
+    const form: HTMLFormElement = thisWord.getContent()!.querySelector('form')
+    const data = new FormData(form)
+    let result: ISignInData = {
+        login: '',
+        password: ''
+    }
+    let validation: boolean = true
+
+    for(let [name, value] of data) {
+        const valueString: string = value.toString()
+        const nameString: string = name.toString()
+        const validationResult = validate(nameString, valueString)
+
+        if (!validationResult) {
+            validation = false
+        }
+
+        result[nameString as keyof typeof result] = valueString
+    }
+
+    return { validation, data: result }
 }
 
-export class MainPage extends Block<MainPageProps> {
-    constructor(props: MainPageProps) {
+export class BaseMainPage extends Block {
+    constructor(props: any) {
         super('main', props)
     }
 
@@ -19,6 +43,14 @@ export class MainPage extends Block<MainPageProps> {
             attributes: {
                 class: 'button button--background-blue main-page-auth-button',
                 type: 'submit',
+            },
+            events: {
+                'click': () => {
+                    const validationResult = validateAllFields(this)
+                    if (validationResult.validation) {
+                        AuthController.signin(validationResult.data)
+                    }
+                }
             }
         })
 
@@ -26,6 +58,11 @@ export class MainPage extends Block<MainPageProps> {
             text: 'Нет аккаунта?',
             attributes: {
                 class: 'button button--background-none'
+            },
+            events: {
+                'click': () => {
+                    router.go('/sign-up')
+                }
             }
         })
 
@@ -67,7 +104,7 @@ export class MainPage extends Block<MainPageProps> {
             <div class="grid--container">
                 <div class="main-page-content grid--content">
                     <div class="grid--block">
-                        <h1 class="main-page-header">{{title}}</h1>
+                        <h1 class="main-page-header">Вход</h1>
 
                         <form>
                             {{{loginInput}}}
@@ -78,9 +115,9 @@ export class MainPage extends Block<MainPageProps> {
                             </div>
                         </form>
                         <div class="main-page-buttons">
-                            <a class="main-page-account-button" href="registration">
+                            <div class="main-page-account-button">
                                 {{{registrationButton}}}
-                            </a>
+                            </div>
                         </div>
                     </div>
 
@@ -89,30 +126,10 @@ export class MainPage extends Block<MainPageProps> {
             </div>
         `, this.props)
     }
-
-    addOtherListeners() {
-        const form = this.getContent()!.querySelector('form')
-        form?.addEventListener('submit', (e) => {
-            e.preventDefault()
-
-            const data = new FormData(form)
-            let result: Record<string, string> = {}
-            let validation: boolean = true
-
-            for(let [name, value] of data) {
-                const valueString: string = value.toString()
-                const nameString: string = name.toString()
-                const validationResult = validate(nameString, valueString)
-
-                if (!validationResult) {
-                    validation = false
-                }
-
-                result[nameString] = valueString
-            }
-
-            console.log(validation)
-            console.log(result)
-        })
-    }
 }
+
+function mapStateToProps(state: any) {
+    return { ...state.user };
+}
+
+export const MainPage = withStore(mapStateToProps)(BaseMainPage)

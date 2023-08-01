@@ -20,7 +20,7 @@ export class Block<P extends Record<string, any> = any> {
     private _meta: Meta
     props: P
     private eventBus: () => EventBus
-    public children: Record<string, Block>
+    public children: Record<string, any>
   
     /** JSDoc
      * @param {string} tagName
@@ -90,6 +90,8 @@ export class Block<P extends Record<string, any> = any> {
   
     dispatchComponentDidMount() {
         this.eventBus().emit(Block.EVENTS.FLOW_CDM);
+
+        Object.values(this.children).forEach(child => child.dispatchComponentDidMount());
     }
   
     _componentDidUpdate() {
@@ -97,6 +99,7 @@ export class Block<P extends Record<string, any> = any> {
       if (!response) {
         return;
       }
+      this.init()
       this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
     }
   
@@ -104,13 +107,13 @@ export class Block<P extends Record<string, any> = any> {
       return true;
     }
   
-    // setProps = nextProps => {
-    //   if (!nextProps) {
-    //     return;
-    //   }
+    setProps = (nextProps: any) => {
+      if (!nextProps) {
+        return;
+      }
   
-    //   Object.assign(this.props, nextProps);
-    // };
+      Object.assign(this.props, nextProps);
+    };
   
   
     _render() {
@@ -129,7 +132,11 @@ export class Block<P extends Record<string, any> = any> {
         const propsAndStubs = {...propsData}
 
         Object.entries(this.children).forEach( ([name, component]) => {
-          propsAndStubs[name] = `<div data-id=${component.id}></div>`
+          if (Array.isArray(component)) {
+            propsAndStubs[name] = `<div data-id="array_${name}"></div>`
+          } else {
+            propsAndStubs[name] = `<div data-id=${component.id}></div>`
+          }
         })
 
         const html = Handlebars.compile(template)(propsAndStubs)
@@ -137,15 +144,32 @@ export class Block<P extends Record<string, any> = any> {
         temp.innerHTML = html
         
         // eslint-disable-next-line
-        Object.entries(this.children).forEach( ([_, component]) => {
-          const stub = temp.content.querySelector(`[data-id=${component.id}]`)
+        Object.entries(this.children).forEach( ([name, component]) => {
+          if (Array.isArray(component)) {
+            const stub = temp.content.querySelector(`[data-id=array_${name}]`)
 
-          if (!stub) {
-            return
+            if (!stub) {
+              return
+            }
+
+            const divContainer = document.createElement('div')
+
+            component.forEach((item) => {
+              divContainer.append(item.getContent())
+            })
+
+            stub.replaceWith(divContainer)
+          } else {
+            const stub = temp.content.querySelector(`[data-id=${component.id}]`)
+
+            if (!stub) {
+              return
+            }
+
+            // component.getContent()?.append
+            stub.replaceWith(component.getContent()!)
           }
-
-          // component.getContent()?.append
-          stub.replaceWith(component.getContent()!)
+          
         })
         return temp.content
     }
