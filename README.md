@@ -7,10 +7,14 @@
 - Stylelint
 - SCSS
 - WebSockets
+- Mocha
+- Chai
+- Husky
 
 ## Установка
 
 - `npm run start` — сборка и запуск проекта
+- `npm run test` - запуск тестов
 
 ## Ссылки на страницы
 

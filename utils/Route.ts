@@ -38,14 +38,6 @@ export default class Route {
     match(pathname: any) {
       return isEqual(pathname, this._pathname);
     }
-
-    back() {
-        window.history.back();
-      }
-  
-    forward() {
-        window.history.forward();
-    }
   
     render() {
       if (!this._block) {

@@ -99,7 +99,7 @@ export class Block<P extends Record<string, any> = any> {
       if (!response) {
         return;
       }
-      this.init()
+      
       this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
     }
   
