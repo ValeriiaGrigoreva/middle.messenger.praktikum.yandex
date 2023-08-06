@@ -2,7 +2,7 @@
     "compilerOptions": {
         "target": "ESNext",
         "useDefineForClassFields": true,
-        "module": "ESNext",
+        "module": "commonjs",
         "lib": ["ESNext", "DOM", "dom.iterable"],
         "moduleResolution": "Node",
         "strict": true,
@@ -18,5 +18,8 @@
         "sourceMap": true,
         "strictNullChecks": true
       },
-      "include": ["src"]
+      "include": ["src", "utils"],
+      "ts-node": {
+        "files": true
+      },
 }

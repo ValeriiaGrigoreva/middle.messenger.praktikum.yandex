@@ -22,6 +22,7 @@ class ChatsController {
             store.on('update', () => {console.log('update')})
             store.set('chats', chats);
 
+            
         } catch(error) {
             console.log(error)
         }

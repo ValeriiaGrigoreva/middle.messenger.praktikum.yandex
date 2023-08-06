@@ -4,7 +4,7 @@ import ChatsController from "../controllers/ChatsController";
 
 export class Socket {
     state: State
-    chatId: number | undefined
+    chatId: number 
     token: string | undefined
     userId: number | undefined
     socket: WebSocket
@@ -37,13 +37,30 @@ export class Socket {
           
         this.socket.addEventListener('message', event => {
             const data = JSON.parse(event.data)
-            if (data.content === "Something's wrong. Try again") return
+            if (data.content === "Something's wrong. Try again" || data.type === "user connected") return
+            
 
             if (Array.isArray(data)) {
                 store.set('activeChatMessages', data)
             } else {
                 ChatsController.fetchChats()
                 this.getMessages()
+
+                console.log(JSON.parse(event.data))
+
+                if (JSON.parse(event.data).user_id !== store.getState().user?.id) {
+                    const unreadMessages = store.getState().unreadMessages
+                    if (unreadMessages && unreadMessages[this.chatId as keyof typeof unreadMessages]) {
+                        unreadMessages[this.chatId] = unreadMessages[this.chatId as keyof typeof unreadMessages] + 1
+                    } 
+
+                    if (unreadMessages && !unreadMessages[this.chatId as keyof typeof unreadMessages]) {
+                        unreadMessages[this.chatId] = 1
+                    }
+
+                    store.set('unreadMessages', unreadMessages)
+                    localStorage.setItem('unreadMessages', JSON.stringify(unreadMessages))
+                }
             }
         });
           

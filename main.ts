@@ -37,6 +37,16 @@ window.addEventListener('DOMContentLoaded', async () => {
         await AuthController.fetchUser();
         await ChatsController.fetchChats();
 
+        if (!localStorage.getItem('unreadMessages')) {
+          const unreadMessages = {}
+          store.getState().chats?.forEach(chat => unreadMessages[chat.id] = 0)
+          localStorage.setItem('unreadMessages', JSON.stringify(unreadMessages))
+          store.set('unreadMessages', unreadMessages)
+        } else {
+          const unreadMessages = JSON.parse(localStorage.getItem('unreadMessages') || '{}')
+          store.set('unreadMessages', unreadMessages)
+        }
+
 
         let sockets: {id: number, socket: Socket}[] = []
 

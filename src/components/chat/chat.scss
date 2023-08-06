@@ -13,6 +13,8 @@
         padding: 16px;
         margin-bottom: 12px;
         cursor: pointer;
+        min-height: 80px;
+        box-sizing: border-box;
 
         @extend .grid--flex, .grid--justify-between;
     }
