@@ -15,10 +15,13 @@ type ChatsPageProps = {
     chats?: {
         title: string, 
         last_message: {
-            content: string
+            content: string,
+            time: string,
         },
         unread_count: number,
+        id: number
     }[]
+    unreadMessages: Record<string, number>
 }
 
 export class BaseChatsPage extends Block<ChatsPageProps> {
@@ -27,27 +30,6 @@ export class BaseChatsPage extends Block<ChatsPageProps> {
     }
 
     init() {
-        let chatsResult: Chat[] = []
-        this.props.chats?.forEach((item) => {
-            const chat  = new Chat({
-                name: item.title,
-                message: `${item.last_message ? item.last_message.content : ''}`,
-                time: '11:57',
-                unreadMessages: item.unread_count,
-                events: {
-                    'click': async () => {
-                        store.set('activeChat', item)
-                        const socketObject = store.getState().sockets?.find(item => item.id === store.getState().activeChat?.id)
-                        socketObject?.socket.getMessages()
-                    }
-                }
-            })
-
-            chatsResult.push(chat)
-        })
-
-        this.children.chats = chatsResult
-
         this.children.chatBlock = new ChatBlock({
             attributes: {
                 class: 'grid--flex grid--flex-column grid--justify-between w--full chat-block',
@@ -107,6 +89,38 @@ export class BaseChatsPage extends Block<ChatsPageProps> {
     }
 
     render() {
+        let chatsResult: Chat[] = []
+        this.props.chats?.forEach((item) => {
+            let lastMessageTime = null
+            if (item.last_message) {
+                const date = new Date(item.last_message.time)
+                const minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+                lastMessageTime = date.getHours() + ':' + minutes
+            }
+            const chat  = new Chat({
+                name: item.title,
+                message: `${item.last_message ? item.last_message.content : ''}`,
+                time: `${lastMessageTime ? lastMessageTime : ''}`,
+                unreadMessages: this.props.unreadMessages[item.id],
+                events: {
+                    'click': async () => {
+                        store.set('activeChat', item)
+                        const socketObject = store.getState().sockets?.find(item => item.id === store.getState().activeChat?.id)
+                        socketObject?.socket.getMessages()
+                        
+                        const unreadMessages = store.getState().unreadMessages
+                        if (unreadMessages && unreadMessages[item.id as keyof typeof unreadMessages]) {
+                            unreadMessages[item.id as keyof typeof unreadMessages] = 0
+                        }
+                    }
+                }
+            })
+
+            chatsResult.push(chat)
+        })
+
+        this.children.chats = chatsResult
+
         return this.compile(`
         <div class="h--full grid--flex">
             <div class="chats--messages-block">
@@ -122,7 +136,7 @@ export class BaseChatsPage extends Block<ChatsPageProps> {
 }
 
 function mapStateToProps(state: any) {
-    return { chats: state.chats };
+    return { chats: state.chats, unreadMessages: state.unreadMessages };
 }
 
 export const ChatsPage = withStore(mapStateToProps)(BaseChatsPage)

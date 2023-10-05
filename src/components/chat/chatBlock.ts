@@ -20,23 +20,7 @@ export class BaseChatBlock extends Block<ChatBlockProps> {
     }
 
     init() {
-        let messagesResult: MessageBlock[] = []
-        this.props.activeChatMessages?.forEach((item) => {
-            if (item.content !== '') {
-                const message = new MessageBlock({
-                    message: item.content,
-                    class: `${item.user_id === store.getState().user?.id ? 'background--my-message' : 'background--friend-message'}`,
-                    attributes: {
-                        class: `grid--flex ${item.user_id === store.getState().user?.id ? 'grid--justify-end' : 'grid--justify-start'}`,
-                    }
-                })
-                
-
-                messagesResult.push(message)
-            }
-        })
-
-        this.children.messages = messagesResult.reverse()
+        
 
         this.children.addUserToChatModal = new ChatModal({
             title: 'Новый пользователь',
@@ -89,6 +73,7 @@ export class BaseChatBlock extends Block<ChatBlockProps> {
                     if(validationResult) {
                         const socketObject = store.getState().sockets?.find(item => item.id === store.getState().activeChat?.id)
                         socketObject?.socket.sendMessage(message)
+                        input!.value = ''
                     }
                 }
             }
@@ -125,6 +110,24 @@ export class BaseChatBlock extends Block<ChatBlockProps> {
     }
 
     render() {
+        let messagesResult: MessageBlock[] = []
+        this.props.activeChatMessages?.forEach((item) => {
+            if (item.content !== '') {
+                const message = new MessageBlock({
+                    message: item.content,
+                    class: `${item.user_id === store.getState().user?.id ? 'background--my-message' : 'background--friend-message'}`,
+                    attributes: {
+                        class: `grid--flex ${item.user_id === store.getState().user?.id ? 'grid--justify-end' : 'grid--justify-start'}`,
+                    }
+                })
+                
+
+                messagesResult.push(message)
+            }
+        })
+
+        this.children.messages = messagesResult.reverse()
+
         return this.compile(`
             <div class="grid--flex-center grid--justify-between">
                 <p class="color--orange">{{title}}</p>

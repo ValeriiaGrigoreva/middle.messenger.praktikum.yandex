@@ -74,10 +74,6 @@ export class HTTPTransport {
             }
           };
 
-          // xhr.onload = function() {
-          //   resolve(xhr);
-          // };
-
           xhr.onabort = () => reject({reason: 'abort'});
           xhr.onerror = () => reject({reason: 'network error'});
           xhr.ontimeout = () => reject({reason: 'timeout'});

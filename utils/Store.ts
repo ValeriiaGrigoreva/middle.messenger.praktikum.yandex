@@ -11,6 +11,7 @@ export interface State {
     activeSocket?: Socket
     activeChatMessages?: {}[],
     sockets?: {id: number, socket: Socket}[]
+    unreadMessages?: any,
   }
   
   class Store extends EventBus {
