@@ -33,7 +33,7 @@ class AuthController {
       try {
         const user = await this.api.getUser();
 
-        store.on('update', () => {console.log('update')})
+        // store.on('update', () => {console.log('update')})
   
         store.set('user', user);
   
